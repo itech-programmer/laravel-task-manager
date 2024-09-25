@@ -32,7 +32,7 @@
             <select class="form-control" id="sort_by">
                 <option value="username">Имя пользователя</option>
                 <option value="email">Email</option>
-                <option value="completed">Статус</option>
+                <option value="status">Статус</option>
             </select>
         </div>
 
@@ -64,9 +64,9 @@
             let loggedIn = {{ auth()->check() ? 'true' : 'false' }};
 
             // Функция для загрузки задач
-            function loadTasks(page = 1, sortBy = 'username', direction = 'asc') {
+            function loadTasks(page = 1) {
                 $.ajax({
-                    url: `/api/tasks?page=${page}&sortBy=${sortBy}&direction=${direction}`,
+                    url: `/api/tasks?page=${page}&sortBy=${currentSort}&direction=${sortDirection}`,
                     method: 'GET',
                     success: function (data) {
                         $('#task-list').empty();
@@ -102,50 +102,6 @@
                 });
             }
 
-            document.addEventListener('DOMContentLoaded', () => {
-                const sortBySelect = document.getElementById('sort_by');
-                const sortDirectionSelect = document.getElementById('sort_direction');
-                const taskList = document.getElementById('task-list');
-
-                let tasks = [];
-
-                const renderTasks = () => {
-                    taskList.innerHTML = '';
-                    tasks.forEach(task => {
-                        const taskItem = document.createElement('div');
-                        taskItem.className = 'list-group-item';
-                        taskItem.innerText = `${task.username} - ${task.email} - ${task.completed ? 'Выполнена' : 'Не выполнена'}`;
-                        taskList.appendChild(taskItem);
-                    });
-                };
-
-                const sortTasks = () => {
-                    const sortBy = sortBySelect.value;
-                    const sortDirection = sortDirectionSelect.value;
-
-                    tasks.sort((a, b) => {
-                        let comparison = 0;
-
-                        if (sortBy === 'username') {
-                            comparison = a.username.localeCompare(b.username);
-                        } else if (sortBy === 'email') {
-                            comparison = a.email.localeCompare(b.email);
-                        } else if (sortBy === 'completed') {
-                            comparison = a.completed === b.completed ? 0 : a.completed ? 1 : -1;
-                        }
-
-                        return sortDirection === 'asc' ? comparison : -comparison;
-                    });
-
-                    renderTasks();
-                };
-
-                sortBySelect.addEventListener('change', sortTasks);
-                sortDirectionSelect.addEventListener('change', sortTasks);
-
-                renderTasks();
-            });
-
             // Функция для обновления пагинации
             function updatePagination(data) {
                 const pagination = $('#pagination');
@@ -174,24 +130,34 @@
                 // Event binding
                 $('#prev-page').off('click').on('click', function () {
                     if (data.current_page > 1) {
-                        loadTasks(data.current_page - 1, currentSort, sortDirection);
+                        loadTasks(data.current_page - 1);
                     }
                 });
 
                 $('#next-page').off('click').on('click', function () {
                     if (data.current_page < data.last_page) {
-                        loadTasks(data.current_page + 1, currentSort, sortDirection);
+                        loadTasks(data.current_page + 1);
                     }
                 });
 
                 $('.page-number').off('click').on('click', function () {
                     const selectedPage = $(this).data('page');
-                    loadTasks(selectedPage, currentSort, sortDirection);
+                    loadTasks(selectedPage);
                 });
             }
 
             // Загрузка задач при первой загрузке страницы
-            loadTasks(currentPage, currentSort, sortDirection);
+            loadTasks(currentPage);
+
+            $('#sort_by').change(function() {
+                currentSort = $(this).val();
+                loadTasks(currentPage);
+            });
+
+            $('#sort_direction').change(function() {
+                sortDirection = $(this).val();
+                loadTasks(currentPage);
+            });
 
             // Добавление задачи
             $('#task-form').on('submit', function (event) {
@@ -205,7 +171,7 @@
                     method: 'POST',
                     data: {username, email, task_text: taskText},
                     success: function () {
-                        loadTasks(currentPage, currentSort, sortDirection);
+                        loadTasks(currentPage);
                         $('#username').val('');
                         $('#email').val('');
                         $('#task_text').val('');
@@ -236,7 +202,7 @@
                                 'Authorization': `Bearer ${accessToken}`
                             },
                             success: function(task) {
-                                loadTasks(currentPage, currentSort, sortDirection);
+                                loadTasks(currentPage);
                                 $('#editTaskModal').modal('hide');
                                 alert('Задача успешно отредактирована!');
                             },
@@ -258,7 +224,7 @@
                         'Authorization': `Bearer ${accessToken}`
                     },
                     success: function () {
-                        loadTasks(currentPage, currentSort, sortDirection);
+                        loadTasks(currentPage);
                         alert('Задача успешно завершена!');
                     },
                     error: function() {

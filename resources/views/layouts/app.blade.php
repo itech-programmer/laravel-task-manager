@@ -36,7 +36,7 @@
 <header class="bg-light py-3">
     <div class="container d-flex justify-content-between align-items-center">
         <h1 class="h4">Задачник</h1>
- 
+
             <button id="login-button" class="btn btn-success" data-toggle="modal" data-target="#loginModal">Login</button>
 
             <form action="{{ route('logout') }}" method="POST">
