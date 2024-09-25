@@ -11,9 +11,9 @@ class UpdateTaskRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
-
+    
     /**
      * Get the validation rules that apply to the request.
      *
@@ -21,8 +21,8 @@ class UpdateTaskRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            //
+              return [
+            'task_text' => 'required|string',
         ];
     }
 }

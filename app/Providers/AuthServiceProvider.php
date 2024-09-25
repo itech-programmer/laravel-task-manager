@@ -22,10 +22,6 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->registerPolicies();
-
-        if (! $this->app->routesAreCached()) {
-            Passport::ignoreRoutes();
-        }
+ 
     }
 }

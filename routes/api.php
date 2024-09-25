@@ -9,13 +9,11 @@ Route::prefix('tasks')->group(function () {
     Route::get('/', [TaskController::class, 'index'])->name('tasks.index');
     Route::post('/', [TaskController::class, 'store'])->name('tasks.store');
 
-    Route::middleware('auth:api')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
         Route::put('/{id}/update', [TaskController::class, 'update'])->name('tasks.update');
         Route::patch('/{id}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
-    });
 });
 
 // Авторизация
-Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 

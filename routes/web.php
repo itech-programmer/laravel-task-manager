@@ -17,4 +17,7 @@ Route::get('/', function () {
     return view('tasks.index');
 });
 
+Route::get('/api/login', function () {
+    return redirect('/');
+})->name('login');
 

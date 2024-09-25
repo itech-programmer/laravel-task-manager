@@ -8,13 +8,6 @@ use Illuminate\Support\Facades\Log;
 
 class TaskService
 {
-    protected TaskRepositoryInterface $taskRepository;
-
-    public function __construct(TaskRepositoryInterface $taskRepository)
-    {
-        $this->taskRepository = $taskRepository;
-    }
-
     /**
      * Получить все задачи с сортировкой.
      *
@@ -29,7 +22,7 @@ class TaskService
             'direction' => $direction
         ]);
 
-        return $this->taskRepository->getAllTasks($sortBy, $direction);
+        return Task::query()->orderBy($sortBy, $direction)->paginate(3);
     }
 
     /**
@@ -44,40 +37,40 @@ class TaskService
             'data' => $data,
         ]);
 
-        return $this->taskRepository->createTask($data);
+          return Task::query()->create($data);
     }
 
     /**
      * Обновить существующую задачу.
      *
-     * @param Task $task Задача для обновления
+     * @param int $taskId Задача для обновления
      * @param array $data Данные для обновления задачи
-     * @return Task
      */
-    public function updateTask(Task $task, array $data): Task
+    public function updateTask(int $taskId, array $data)
     {
         Log::info('Обновление задачи', [
-            'task_id' => $task->id,
+            'task_id' => $taskId,
             'data' => $data
         ]);
 
-        return $this->taskRepository->updateTask($task, $data);
+        $task = Task::query()->findOrFail($taskId);
+
+        $task->update(array_merge($data, ['is_edited_by_admin' => true]));
+        return $task;
     }
 
     /**
      * Завершить задачу.
      *
-     * @param Task $task Задача для завершения
-     * @param int $userId Идентификатор пользователя, который завершает задачу
-     * @return Task
+     * @param int $task Задача для завершения
      */
-    public function completeTask(Task $task, int $userId): Task
+    public function completeTask(int $taskId)
     {
         Log::info('Завершение задачи', [
-            'task_id' => $task->id,
-            'completed_by' => $userId
+            'task_id' => $taskId,
         ]);
-
-        return $this->taskRepository->completeTask($task);
+        $task = Task::query()->findOrFail($taskId);
+        $task->update(['status' => true]);
+        return $task;
     }
 }

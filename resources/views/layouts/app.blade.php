@@ -23,6 +23,10 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets') }}/css/app.css">
     <!-- end::App -->
 
+    <!-- begin::Pages -->
+    @yield('style')
+    <!-- end::Pages -->
+
 </head>
 <!-- end::Head -->
 <!-- begin::Body -->
@@ -32,7 +36,14 @@
 <header class="bg-light py-3">
     <div class="container d-flex justify-content-between align-items-center">
         <h1 class="h4">Задачник</h1>
-        <button id="logout-button" class="btn btn-danger">Logout</button>
+ 
+            <button id="login-button" class="btn btn-success" data-toggle="modal" data-target="#loginModal">Login</button>
+
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" id="logout-button" class="btn btn-danger">Logout</button>
+            </form>
+
     </div>
 </header>
 <!-- end::Header -->
@@ -51,6 +62,60 @@
 
 <!-- begin::App -->
 <script src="{{ asset('assets') }}/js/app.js"></script>
+
+<!-- begin::Pages -->
+<script>
+    $(document).ready(function () {
+        let accessToken = localStorage.getItem('access_token');
+
+        function updateAuthButtons() {
+            if (accessToken) {
+                $('#login-button').hide();
+                $('#logout-button').show();
+            } else {
+                $('#login-button').show();
+                $('#logout-button').hide();
+            }
+        }
+
+        // Начальное состояние кнопок авторизации
+        updateAuthButtons();
+
+        $('#login-button').on('click', function () {
+            $('#login-modal').modal('show');
+        });
+
+        $('#logout-button').on('click', function () {
+            localStorage.removeItem('access_token');
+            accessToken = null;
+            updateAuthButtons();
+        });
+
+        $('#login-form').on('submit', function (event) {
+            event.preventDefault();
+            const username = $('#login-username').val();
+            const password = $('#login-password').val();
+
+            $.ajax({
+                url: '/api/login',
+                method: 'POST',
+                data: { username, password },
+                success: function (data) {
+                    localStorage.setItem('access_token', data.access_token);
+                    accessToken = data.access_token;
+                    $('#login-modal').modal('hide');
+                    updateAuthButtons();
+                    location.reload();
+                },
+                error: function () {
+                    alert('Ошибка авторизации. Проверьте email и пароль.');
+                }
+            });
+        });
+    });
+</script>
+@yield('script')
+<!-- end::Pages -->
 
 </body>
 <!--end::Body-->

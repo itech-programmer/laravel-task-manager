@@ -69,16 +69,16 @@ class TaskController extends Controller
     /**
      * Обновить существующую задачу.
      *
-     * @param Task $task
+     * @param int $taskId
      * @param UpdateTaskRequest $request
      * @return JsonResponse
      */
-    public function update(Task $task, UpdateTaskRequest $request): JsonResponse
+    public function update(int $taskId, UpdateTaskRequest $request): JsonResponse
     {
         $validatedData = $request->validated();
-        Log::info('Обновление задачи', ['task_id' => $task->id, 'data' => $validatedData]);
+        Log::info('Обновление задачи', ['task_id' => $taskId, 'data' => $validatedData]);
 
-        $updatedTask = $this->taskService->updateTask($task, $validatedData);
+        $updatedTask = $this->taskService->updateTask($taskId, $validatedData);
 
         Log::info('Задача успешно обновлена', ['task_id' => $updatedTask->id]);
 
@@ -88,14 +88,14 @@ class TaskController extends Controller
     /**
      * Завершить задачу.
      *
-     * @param Task $task
+     * @param int $taskId
      * @return JsonResponse
      */
-    public function complete(Task $task): JsonResponse
+    public function complete(int $taskId): JsonResponse
     {
-        Log::info('Завершение задачи', ['task_id' => $task->id]);
+        Log::info('Завершение задачи', ['task_id' => $taskId]);
 
-        $completedTask = $this->taskService->completeTask($task, Auth::id());
+        $completedTask = $this->taskService->completeTask($taskId);
 
         Log::info('Задача успешно завершена', ['task_id' => $completedTask->id]);
 
