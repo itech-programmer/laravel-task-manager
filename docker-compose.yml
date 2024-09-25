@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+    # Сервис PHP
+    task-manager-app:
+        container_name: task-manager-app
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+        volumes:
+            - .:/var/www/laravel-task-manager
+        networks:
+            - app-network
+
+    # Сервис Nginx
+    task-manager-web:
+        container_name: task-manager-web
+        image: nginx:alpine
+        volumes:
+            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+            - .:/var/www/laravel-task-manager
+        ports:
+            - "80:80"
+        depends_on:
+            - task-manager-app
+            - task-manager-db
+        networks:
+            - app-network
+
+    # Сервис MySQL
+    task-manager-db:
+        image: mysql:8.0
+        container_name: task-manager-db
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_DATABASE: task_manager
+            MYSQL_ROOT_PASSWORD: password
+            MYSQL_USER: user
+            MYSQL_PASSWORD: password
+        volumes:
+            - db_data:/var/lib/mysql/
+        networks:
+            - app-network
+
+# Настройки сетей
+networks:
+    app-network:
+        driver: bridge
+
+# Настройки томов
+volumes:
+    db_data:
